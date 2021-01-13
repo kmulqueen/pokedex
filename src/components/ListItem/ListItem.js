@@ -1,12 +1,12 @@
 import React from "react";
 
-const ListItem = () => {
+const ListItem = ({ number, name, type, weaknesses }) => {
   return (
     <tr>
-      <td>1</td>
-      <td>Bulbasaur</td>
-      <td>Grass</td>
-      <td>Fire</td>
+      <td>{number}</td>
+      <td>{name}</td>
+      {type.length ? <td>{type}</td> : <td>No Type Found</td>}
+      {weaknesses.length ? <td>{weaknesses}</td> : <td>No Weaknesses Found</td>}
     </tr>
   );
 };
