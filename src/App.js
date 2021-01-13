@@ -1,10 +1,10 @@
 import Container from "react-bootstrap/Container";
-import List from "./components/List";
+import HomePage from "./pages/HomePage";
 
 function App() {
   return (
     <Container>
-      <List />
+      <HomePage />
     </Container>
   );
 }

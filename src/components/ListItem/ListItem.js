@@ -5,8 +5,15 @@ const ListItem = ({ number, name, type, weaknesses }) => {
     <tr>
       <td>{number}</td>
       <td>{name}</td>
-      {type.length ? <td>{type}</td> : <td>No Type Found</td>}
-      {weaknesses.length ? <td>{weaknesses}</td> : <td>No Weaknesses Found</td>}
+      {/* Check that the type array has content. If the pokemon has multiple types, format the array as a string and separate the contents by a comma */}
+      {type.length ? <td>{type.join(", ")}</td> : <td>No Type Found</td>}
+
+      {/* Check that the weaknesses array has content. If the pokemon has multiple weaknesses, format the array as a string and separate the contents by a comma */}
+      {weaknesses.length ? (
+        <td>{weaknesses.join(", ")}</td>
+      ) : (
+        <td>No Weaknesses Found</td>
+      )}
     </tr>
   );
 };
