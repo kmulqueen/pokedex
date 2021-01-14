@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const ListItem = ({ number, name, type, weaknesses }) => {
   return (
@@ -14,6 +15,9 @@ const ListItem = ({ number, name, type, weaknesses }) => {
       ) : (
         <td>No Weaknesses Found</td>
       )}
+      <td>
+        <Link to={`/pokemon/${number}`}>Details</Link>
+      </td>
     </tr>
   );
 };

@@ -167,7 +167,6 @@ const HomePage = () => {
   }, [pokemonList]);
   return (
     <>
-      <h1>Home Page</h1>
       <h3>Search by Pokemon Name</h3>
       <Form onSubmit={searchPokemonHandler}>
         <Row>
