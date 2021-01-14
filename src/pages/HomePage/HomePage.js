@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import List from "../../components/List";
@@ -31,6 +33,16 @@ const HomePage = () => {
   ];
   // Set state for type checkboxes by using reduce on the pokemonTypes array to turn each type into an object with the type name for the key and false for the value
   const [typeChecked, setTypeChecked] = useState(
+    pokemonTypes.reduce(
+      (types, acc) => ({
+        ...types,
+        [acc]: false,
+      }),
+      {}
+    )
+  );
+  // Set state for weaknesses checkboxes by using reduce on the pokemonTypes array to turn each weaknesses into an object with the weaknesses name for the key and false for the value
+  const [weaknessesChecked, setWeaknessesChecked] = useState(
     pokemonTypes.reduce(
       (types, acc) => ({
         ...types,
@@ -75,7 +87,7 @@ const HomePage = () => {
   };
 
   // Function to filter pokemon
-  const filterPokemonTypeHandler = (e) => {
+  const filterPokemonHandler = (e) => {
     // Prevent default submission behavior (page reload)
     e.preventDefault();
 
@@ -87,18 +99,36 @@ const HomePage = () => {
         typeFilters.push(type);
       }
     }
+    // Initialize a variable to store the weaknessess that are true from the weaknessesChecked state
+    const weaknessesFilters = [];
+    // Loop over the properties in the weaknessesChecked state and add the weaknessess that evaluate to true to the weaknessesFilters array
+    for (const weaknesses in weaknessesChecked) {
+      if (weaknessesChecked[weaknesses] === true) {
+        weaknessesFilters.push(weaknesses);
+      }
+    }
 
     // Check that filters exist
-    if (typeFilters.length) {
+    if (typeFilters.length || weaknessesFilters.length) {
       // Function to compare 2 arrays for the same content
       const isSame = (arr1, arr2) =>
         arr1.length === arr2.length &&
         arr1.every((value, idx) => value === arr2[idx]);
 
-      // Filter the pokemonList to return any pokemon whose types meet the filter requirements
-      const filterResults = pokemonList.filter((pokemon) =>
-        isSame(pokemon.type.sort(), typeFilters.sort())
-      );
+      // Filter the pokemonList to return any pokemon whose types/weaknesses meet the filter requirements
+      const filterResults = pokemonList.filter((pokemon) => {
+        let res;
+        if (typeFilters.length && weaknessesFilters.length) {
+          res =
+            (isSame(pokemon.type.sort(), typeFilters.sort()),
+            isSame(pokemon.weaknesses.sort(), weaknessesFilters.sort()));
+        } else if (typeFilters.length && !weaknessesFilters.length) {
+          res = isSame(pokemon.type.sort(), typeFilters.sort());
+        } else if (!typeFilters.length && weaknessesFilters.length) {
+          res = isSame(pokemon.weaknesses.sort(), weaknessesFilters.sort());
+        }
+        return res;
+      });
 
       // Update list to show filter results if any exist
       if (filterResults.length) {
@@ -120,6 +150,15 @@ const HomePage = () => {
     });
   };
 
+  // Function to handle type filter checkbox changes
+  const weaknessesCheckboxHandler = (e) => {
+    // Set typeChecked state to maintain all of it's current values except where the key is equal to e.target.name, in which case it will toggle the value
+    setWeaknessesChecked({
+      ...weaknessesChecked,
+      [e.target.name]: !weaknessesChecked[e.target.name],
+    });
+  };
+
   // If the pokemonList state is an empty array, run the fetchPokemon function
   useEffect(() => {
     if (!pokemonList.length) {
@@ -131,42 +170,74 @@ const HomePage = () => {
       <h1>Home Page</h1>
       <h3>Search by Pokemon Name</h3>
       <Form onSubmit={searchPokemonHandler}>
-        <Form.Group controlId="formSearch">
-          <Form.Label>Pokemon Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter Pokemon Name..."
-            onChange={(e) => setSearch(e.target.value)}
-            value={search}
-          />
-        </Form.Group>
+        <Row>
+          <Col>
+            <Form.Group controlId="formSearch">
+              <Form.Label>Pokemon Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Pokemon Name..."
+                onChange={(e) => setSearch(e.target.value)}
+                value={search}
+              />
+            </Form.Group>
+          </Col>
 
-        <Button variant="primary" type="submit">
-          Search
-        </Button>
-        <Button variant="primary" type="button" onClick={searchResetHandler}>
-          Reset
-        </Button>
+          <Button variant="primary" type="submit">
+            Search
+          </Button>
+
+          <Button variant="primary" type="button" onClick={searchResetHandler}>
+            Reset
+          </Button>
+        </Row>
       </Form>
-      <h3>Filter Pokemon Type</h3>
-      <Form onSubmit={filterPokemonTypeHandler}>
-        <Form.Group controlId="formTypeFilterCheckbox">
-          <Form.Label>Type: </Form.Label>
-          {pokemonTypes.map((type, idx) => (
-            <Form.Check
-              key={idx}
-              type="checkbox"
-              label={type}
-              name={type}
-              checked={typeChecked[type]}
-              onChange={typeCheckboxHandler}
-            />
-          ))}
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Apply Filter
-        </Button>
-      </Form>
+
+      <Row>
+        <Col>
+          <h3>Filter Pokemon Type</h3>
+          <Form onSubmit={filterPokemonHandler}>
+            <Form.Group controlId="formTypeFilterCheckbox">
+              <Form.Label>Type: </Form.Label>
+              {pokemonTypes.map((type, idx) => (
+                <Form.Check
+                  key={idx}
+                  type="checkbox"
+                  label={type}
+                  name={type}
+                  checked={typeChecked[type]}
+                  onChange={typeCheckboxHandler}
+                />
+              ))}
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Apply Filter
+            </Button>
+          </Form>
+        </Col>
+        <Col>
+          <h3>Filter Pokemon Weaknesses</h3>
+          <Form onSubmit={filterPokemonHandler}>
+            <Form.Group controlId="formWeaknessesFilterCheckbox">
+              <Form.Label>Weaknesses: </Form.Label>
+              {pokemonTypes.map((type, idx) => (
+                <Form.Check
+                  key={idx}
+                  type="checkbox"
+                  label={type}
+                  name={type}
+                  checked={weaknessesChecked[type]}
+                  onChange={weaknessesCheckboxHandler}
+                />
+              ))}
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Apply Filter
+            </Button>
+          </Form>
+        </Col>
+      </Row>
+
       <List
         pokemonList={
           filteredPokemonList.length ? filteredPokemonList : pokemonList
